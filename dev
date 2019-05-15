@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+# function dev() {
+#     if [ -e dev ]
+#     then
+#         ./dev "$@"
+#     else
+#         echo "There isn't a 'dev' file here."
+#     fi
+# }
+
+if [ $# -gt 0 ]; then
+
+    if [ "$1" == "pycco" ]; then
+        shift 1
+        if [ $# -eq 0 ]; then
+            pycco -d ./application/docs ./application/gulpfile.js 
+        else 
+            echo not zero
+        fi
+
+    elif [ "$1" == "bash" ]; then
+        shift 1
+        docker-compose run --rm nodejs bash 
+
+    elif [ "$1" == "run" ]; then
+        shift 1
+        docker-compose run --rm nodejs "$@"
+
+
+# Add pycco 
+#    ~/.local/bin/pycco gulpfile.js
+
+    elif [ "$1" == "compile-tailwind" ] || [ "$1" == "ctw" ]; then
+        docker-compose run --rm nodejs ./build-tw.sh
+
+    elif [ "$1" == "tailwind-version" ]; then
+        shift 1
+        docker-compose run --rm nodejs node_modules/.bin/tailwind --version
+
+    elif [ "$1" == "node-version" ]; then
+        shift 1
+        docker-compose run --rm nodebox node --version
+
+    elif [ "$1" == "yarn-version" ]; then
+        shift 1
+        docker-compose run --rm node yarn --version
+
+
+    elif [ "$1" == "bash-db" ]; then
+        shift 1
+        docker-compose exec db bash
+
+    elif [ "$1" == "remove-all-containers" ]; then
+        docker rm $(docker ps -a -q)
+
+    elif [ "$1" == "build-app" ]; then
+        docker build \
+           --build-arg USER_ID=$(id -u ${USER}) \
+           --build-arg GROUP_ID=$(id -g ${USER}) \
+           -t rp/tailwind:latest -f ./app-dockerfile .
+
+    elif [ "$1" == "npm" ]; then
+        shift 1
+        docker-compose run --rm \
+            app \
+            npm "$@"
+
+    elif [ "$1" == "yarn" ]; then
+        shift 1
+        docker-compose run --rm \
+            node \
+            yarn "$@"
+
+    elif [ "$1" == "gulp" ]; then
+        shift 1
+        docker-compose run --rm \
+            nodejs \
+            ./node_modules/.bin/gulp "$@"
+
+    elif [ "$1" == "ps" ]; then
+        docker-compose ps
+
+    else
+        docker-compose "$@"
+
+    fi
+
+else
+    echo "--------------"
+    echo "dev shortcuts:"
+    echo "--------------"
+    echo "dev start | up       Start containers"
+    echo "dev stop | down      Stop containers "
+    echo "artisan...           Start Laravel artisan with args"
+    echo "composer...          Run composer with args"
+    echo "bash                 Start Bash as www-data"
+    echo "bash-root            Start Bash as root"
+    echo "tinker               Start Laravel tinker"
+    echo "test...              Run PHPUnit with args"
+    echo "laravel-version      Show Laravel version"
+    echo "ps                   Show running containers"
+fi

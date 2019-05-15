@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: nodetest:latest  
+    networks:
+       - appnet
+    volumes:
+      - ./application:/opt
+    ports:
+      - 8080:80
+    working_dir: /opt   
+    command: bash
+networks:
+  appnet:
+    driver: bridge
+# volumes:
+#   dbdata:
+#     driver: local
+#   cachedata:
+#     driver: local
